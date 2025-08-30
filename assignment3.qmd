@@ -1,0 +1,99 @@
+---
+title: "Assignment 3"
+---
+
+[Return Home](index.qmd)
+
+# Part 1
+
+```{r, warning=FALSE, message=FALSE}
+#Sets a random vector of 50 random numbers in a normal distribution
+Y <- rnorm(50) 
+#Every number in Y vector that is above 3.5 or below -3.5 is replaced with NA
+Y[Y < -3.5 | Y > 3.5] <- NA 
+#Sets variable x as the sequence of numbers between -3.5 and 3.5 by increments of 0.1
+x <- seq(-3.5, 3.5, .1)
+#Sets variable dn, which uses the x variable in dnorm() function to make a normal distribution
+dn <- dnorm(x)
+#Sets parameters for the plot. Margins on bottom, left, top, and right as 4.5, 
+  # 4.1, 3.1, and 0 lines respectively
+par(mar=c(4.5, 4.1, 3.1, 0))
+#Creates a histogram using Y for the variable, sets bars for histograms as the default between 
+  # numbers -3.5 and 3.5, sets the upper limit for the y-axis as 0.5, sets color for 
+  # the bars as gray80, histogram also shows probability density rather than counts
+hist(Y, breaks=seq(-3.5, 3.5), ylim=c(0, 0.5), col="gray80", freq=FALSE)
+#Creates a line with a width of 2, within the bounds of the x variable in a normal distribution
+lines(x, dnorm(x), lwd=2)
+#Sets new parameters for the margins of the plot
+par(mar=c(5.1, 4.1, 4.1, 2.1)) 
+```
+
+# Part 2
+
+```{r, warning=FALSE, message=FALSE, results='hide'}
+plot.new()
+data(anscombe)
+plot(anscombe$x1,anscombe$y1)
+
+lm1 <- lm(y1 ~ x1, data=anscombe)
+lm2 <- lm(y2 ~ x2, data=anscombe)
+lm3 <- lm(y3 ~ x3, data=anscombe)
+lm4 <- lm(y4 ~ x4, data=anscombe)
+
+ff <- y ~ x
+mods <- setNames(as.list(1:4), paste0("lm", 1:4))
+
+for(i in 1:4) {
+  ff[2:3] <- lapply(paste0(c("y","x"), i), as.name)
+  ## or   ff[[2]] <- as.name(paste0("y", i))
+  ##      ff[[3]] <- as.name(paste0("x", i))
+  mods[[i]] <- lmi <- lm(ff, data = anscombe)
+  print(anova(lmi))}
+sapply(mods, coef)  # Note the use of this function
+lapply(mods, function(fm) coef(summary(fm)))
+op <- par(mfrow = c(2, 2), mar = 0.1+c(4,4,1,1), oma =  c(0, 0, 2, 0)) 
+
+#CHANGING COLOR to darkred, LINE TYPES to longdash and COLOR mediumblue,
+  # CHARACTERS to 17 type, and CEX to 1.3
+for(i in 1:4) {
+  ff[2:3] <- lapply(paste0(c("y","x"), i), as.name)
+  plot(ff, data = anscombe, col = "darkred", pch = 17, cex = 1.3,
+       xlim = c(3, 19), ylim = c(3, 13))
+  abline(mods[[i]], col = "mediumblue", lty="longdash")}
+mtext("Chantan's 4 Regression data sets", outer = TRUE, cex = 1.5)
+par(op)
+```
+
+# Part 3
+
+```{r, warning=FALSE, message=FALSE}
+plot.new()
+par(mfrow = c(2, 2), mar = 0.1+c(4,4,1,1), oma =  c(0, 0, 2, 0), 
+    bg="gray70") #Added a gray70 background so lighter colors can be seen better
+
+#CHANGING COLOR to gold1, BG to turquoise1, LINE COLOR to firebrick1, AND CHARACTERS to 23
+  # and CHANGING FONT to serif for the plots
+for(i in 1:4) {
+  ff[2:3] <- lapply(paste0(c("y","x"), i), as.name)
+  plot(ff, data = anscombe, family="serif", col = "gold1", pch = 23, bg = "turquoise1", 
+       cex = 1.5, xlim = c(3, 19), ylim = c(3, 13))
+  abline(mods[[i]], col = "firebrick1", lty="longdash")}
+#CHANGING FONT to serif for the title
+mtext("Chantan's 4 Regression data sets", family="serif", outer = TRUE, cex = 1.5)
+```
+
+# Part 4
+
+```{r, warning=FALSE, message=FALSE}
+library(tidyverse)
+
+ggplot(anscombe, aes(x1,y1)) + 
+  geom_point(shape = 23, color = "gold1", fill = "turquoise1", size = 4) + 
+  geom_smooth(method = "lm", color = "firebrick1", linetype = "longdash", se = FALSE) + 
+  theme_classic(base_family = "serif") + 
+  labs(title="Chantan's Regession data set") + 
+  theme(plot.background = element_rect(fill = "gray70"), 
+        panel.background = element_rect(fill = "gray70"),
+        plot.title = element_text(face = "bold", hjust = 0.5, size = 20))
+
+```

@@ -1,0 +1,109 @@
+---
+title: "Assignment 7"
+---
+
+[Return Home](index.qmd)
+
+[Test](\assets\GroupProjectDataVis.html)
+
+# Assignment 7 Hackathon 2.0
+
+All data is from the [County Health Ranking 2024 dataset](https://www.countyhealthrankings.org/health-data/methodology-and-sources/data-documentation)
+
+<iframe width="800" height="600" src="https://chantanmorinjr.shinyapps.io/Assignment7Hackathon2/">
+
+</iframe>
+
+## Code
+
+```{r, echo=TRUE, warning=FALSE, message=FALSE, results='hide', eval=FALSE}
+# Call data
+data <- read.csv("CleanProjectData.csv")
+data.short <- data[, c(5,6,13,14,19)]
+data.var <- data[,c(13,14)]
+region_choices <- c("All", data.short$Region)
+
+# App UI
+ui <- fluidPage(
+  tags$style(HTML("
+    body {
+      background-color: #b3b3b3;
+      color: black;
+    }
+    
+    .shiny-input-container {
+      color: black;
+    }"
+  )),
+  
+  titlePanel("Assignment 7"), 
+  
+  sidebarLayout(
+    sidebarPanel(
+      selectInput("plotType", "Choose Plot Type:", 
+                  choices = c("Histogram", "Scatterplot", "Bubble Chart"), selected = "Histogram"),
+      uiOutput("variable_ui"),
+    ), 
+    
+    mainPanel(
+      plotOutput("distPlot")
+    )
+  )
+)
+
+
+# App Server
+server <- function(input, output) {
+  
+  output$variable_ui <- renderUI({
+    switch(input$plotType,
+           "Histogram" = sliderInput("bins","Number of Bins:",
+                                     min = 1, max = 50, value = 30),
+           "Scatterplot" = tagList(
+             selectInput("variable", "Choose Variable:", choices = names(data.var)),
+             selectInput("txregion", "Select Region:", choices = region_choices)), 
+           "Bubble Chart" = tagList(
+             selectInput("txregion", "Select Region:", choices = region_choices)),
+    )
+  })
+  
+  output$distPlot <- renderPlot({
+    req(input$plotType)
+    
+    if (input$plotType == "Histogram" && !is.null(input$bins)) {
+      x <- data$MedianHouseholdIncome
+      bins <- seq(min(x), max(x), length.out = input$bins + 1)
+      return(hist(x, breaks = bins, col = 'navy', border = 'white',
+                  xlab = 'Median Household Income',
+                  main = 'Histogram of Median Household Income'))
+    }
+    
+    if (input$plotType == "Scatterplot" && !is.null(input$variable) && !is.null(input$txregion)) {
+      variable <- input$variable
+      region <- input$txregion
+      filtered_data <- if (region == "All") {data.short} else {data.short[data.short$Region == region, ]}
+      return(ggplot(filtered_data, aes_string(x = variable, y = "VoterTurnoutRate", fill = "Region")) +
+               geom_point(shape = 23, color = "navy", size = 2.25) +
+               labs(x = variable, y = "Voter Turnout Rate", title = paste("Voter Turnout vs", variable)) +
+               theme_classic())
+    }
+    
+    if (input$plotType == "Bubble Chart" && !is.null(input$txregion)) {
+      region <- input$txregion
+      filtered_data <- if (region == "All") {data.short} else {data.short[data.short$Region == region, ]}
+      return(ggplot(filtered_data, aes_string(x= "ObesityRate", y= "FoodEnviornmentIndex", size = "VoterTurnoutRate", color = "Region")) +
+               geom_point(alpha=0.5, shape= 16) +
+               scale_size(range = c(.1, 11), name="Voter Turnout") +
+               theme(legend.position="bottom") +
+               ylab("Food Environment Index") +
+               xlab("Obesity Rate") +
+               theme_bw() +
+               theme(axis.line = element_line(colour = "black"),
+                     panel.grid.minor = element_blank(),
+                     panel.border = element_blank(),
+                     panel.background = element_blank()))
+      }
+  })
+}
+
+```

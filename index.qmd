@@ -1,0 +1,18 @@
+---
+title: "Chantan's Quarto Website"
+author: "Chantan Morin Jr"
+---
+
+## WELCOME {style="text-align: center;"}
+
+This website will be used to turn in assignments for the following courses:
+
+# EPPS 6356: Data Visualization {style="text-align: center;"}
+
+-   turn in my assignments for EPPS 6356
+-   familiarize myself with R and Quarto Website building
+-   test certain codes and aesthetics
+
+# EPPS 6302: Data Collection & Production {style="text-align: center;"}
+
+-   turn in my assignments for EPPS 6302

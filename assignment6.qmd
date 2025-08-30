@@ -1,0 +1,17 @@
+---
+title: "Assignment 6"
+---
+
+[Return Home](index.qmd)
+
+# Assignment 6 -c-
+
+<iframe width="800" height="600" src="https://chantanmorinjr.shinyapps.io/EPPSAssignment6/">
+
+</iframe>
+
+# Assignment 6 -d-
+
+<iframe width="800" height="600" src="https://chantanmorinjr.shinyapps.io/Assignment6d/">
+
+</iframe>

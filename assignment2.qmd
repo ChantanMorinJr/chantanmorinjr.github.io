@@ -1,0 +1,87 @@
+---
+title: "Assignment 2"
+---
+
+[Return Home](index.qmd)
+
+# Happy Planet Plots
+
+```{r, echo=FALSE, warning=FALSE, message=FALSE, results='hide'}
+
+library(dplyr)
+library(readxl)
+setwd("C:/Users/chant/OneDrive/Documents/Chantan Quarto Website/_site")
+data <- read_excel("Happy Planet Index.xlsx")
+colnames(data) <- c("ISO", "Continent", "Population(1000)", "LifeExpectancy", 
+                    "Wellbeing", "CarbonFootprint", "HPI", "CF_Threshold", 
+                    "GDP_per_Capita")
+
+data.c2 <- data %>%
+  filter(Continent == "2")
+data.c6 <- data %>%
+  filter(Continent == "6")
+
+#Line Plot
+par(mfrow=c(2, 2), bg="gray67", fg="black", family="serif", mar=c(4, 1, 2, 4), cex=.7)
+plot.new()
+plot.window(c(15, 45), c(60, 86))
+lines(data.c2$HPI, data.c2$LifeExpectancy)
+lines(data.c6$HPI, data.c6$LifeExpectancy)
+points(data.c2$HPI, data.c2$LifeExpectancy, pch=18, cex=3, col="firebrick1")
+points(data.c6$HPI, data.c6$LifeExpectancy, pch=18, cex=3, col="mediumblue")
+axis(1, at=seq(15, 45, 5))
+axis(4, at=seq(60, 90, 5))
+box(bty="u")
+mtext("Happiness Index", side=1, line=2.5, cex=0.9)
+mtext("Life Expectancy", side=4, line=2.5, las=0, cex=0.9)
+legend(17, 82, c("Continent 2", "Continent 6"), fill = c("firebrick1", "mediumblue"))
+
+#Histogram
+par(mar=c(4, 5, 2, 1), cex=0.7)
+hist(data$HPI, breaks=10, col="gray35", main="HPI Histogram", xlab="")
+mtext("Happiness Index", side=1, line=2.25, cex=0.9)
+box(bty="l")
+
+#Box Plot
+data <- data %>% 
+  mutate(GDP.Category = case_when(GDP_per_Capita < 20000 ~ "Low",
+                                   GDP_per_Capita >= 20000 & 
+                                    GDP_per_Capita < 50000 ~ "Medium",
+                                   GDP_per_Capita >= 50000 ~ "High"))
+
+par(mar=c(3, 4, 0.5, 4), cex=0.9, family="serif")
+boxplot(data$HPI ~ data$GDP.Category, data,
+        boxwex = .5, at = c(3,1,2), col="azure2", xlab="", ylab="Happiness Index")
+mtext("GDP per Capita", side=1, line=2, cex=1)
+
+#Pie Chart
+GDP.freq <- table(data$GDP.Category)
+
+par(mar=c(0, 0, 1, 0), cex=1)
+pie(GDP.freq, col = c("firebrick1", "mediumblue", "yellow1"),
+    main="GDP Frequency", cex.main=1.1)
+
+```
+
+### Perspective Plot with example data
+
+```{r, echo=FALSE, warning=FALSE, message=FALSE, results='hide'}
+
+ex <- function(x, y){sqrt(x^2 + y^2)}
+x <- y <- seq(-1, 1, length = 30)
+z <- outer(x, y, ex)
+par(bg="gray67")
+persp(x, y, z, theta = 30, phi = 15,
+      main="persp plot example", zlab = "z", col = "firebrick1", shade=0.3)
+
+```
+
+# One-Page Note
+
+Based on information from *Lazer, Kennedy, King, & Vespignani* (2014). [The Parable of Google Flu: Traps in Big Data Analysis](https://www.jstor.org/stable/24743402)
+
+According to *Ginsberg, Mohebbi, Patel, et al (2009)*, the frequency of certain Google search queries is highly correlated with the percentage of physician visits where the patient arrives with flu-like symptoms. This means that it is possible to accurately estimate the amount of influenza activity in the US using the amount of influenza-related search queries. The usual time it takes to respond to outbreaks is 1-2 week with the current surveillance systems. Using Google search queries can cut response time to a day. However, in February 2013, Google Flu Trends was predicting twice the amount of doctor visits for influenza-like illness.
+
+Big Data Hubris is the assumption that big data are a substitute for traditional data collection analysis, rather than a supplement to it. But more data does not make it more reliable or valid for scientific analysis. GFT was supposed to find the best matches among 50 million search terms to fit 1152 data points **(overparameterization)**, which led to terms related to the CDC but not to the flu being gathered into the estimates. This led to GFT being able to run will on the original data, but not so much on the new data with new searches later on **(overfitting)**. GFT began to constantly overestimate flu prevalence and miss spikes in actual flu cases. This could have been avoided if GFT was used along with more accurate CDC data on a two-week time lag. GFT could then correct itself with the newest CDC data to make more accurate predictions in the future. The inaccuracies, however, may have been on Google’s end, due to their ever-changing search engine, specifically their change to show recommended searches.
+
+Transparency and replicability is necessary in research. GFT failed to provide the 45 search terms used to make its estimates, so others who want to build or check these methods are left guessing. GFT could also do so much good if it is perfected, giving accurate predictions of the flu week or months ahead of time. Thus, big data analysis should work together with traditional applied statistics to provide a better understanding of reality.

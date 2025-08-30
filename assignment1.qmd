@@ -1,0 +1,25 @@
+---
+title: "Assignment 1"
+---
+
+[Return Home](index.qmd)
+
+# Leaf of Winter
+
+Re-coloring of Leaf of Fall with lightblue
+
+![Leaf of Winter](\images\Leaf of Winter.png)
+
+# Graphic Critique
+
+The [Council on Criminal Justice](https://counciloncj.org/) is an alleged non-partisan organization that publishes crime statistics in order to better policy and policymakers' decisions on how to deal with Criminal Justice issues.
+
+The following graphic was taken from their [Homicide Trends Report](https://counciloncj.org/homicide-trends-report/) published in December 2023.
+
+![CCJ: Homicide Victimizations by Race and Sex](\images\Graphic Critique.png)
+
+The first thing the reader will notice when looking at the graphic on the CCJ website is that the graphic is **too large to be seen on the screen in its entirety** without scrolling. There is an option to make the graphic full screen, but that brings to light the second issue: the graphic has **no title connected to it**. The only title the graphic receives is a flush-left, bolded text that is hardly differentiated from the regular text in the article. Compared to the size of the graphic, the title is hardly there.
+
+Thirdly, the **colors are poorly chosen**. Yellow stands out too little against the white background, and it does not help that it is the smallest bar in the graph. Furthermore, "White Males" is shown by by a purple-ish, nearly black, color compared to the much lighter blue used for "Black Males". This may cause confusion, as when one thinks of "Black", they may instinctively look at a darker bar (like with a graph sorted by sex using pink and blue, the reader may instinctively believe the pink means women and blue means male).
+
+Last, but not least, the **legend is not used in available white space** within the graphic. On the top-right of the graphic, above the last four or five groups, there is plenty of space to put a legend explaining what the colors of the bars represent. It would make the whole graphic smaller and easier to read.

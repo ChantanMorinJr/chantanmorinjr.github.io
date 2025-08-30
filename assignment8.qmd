@@ -1,0 +1,383 @@
+---
+title: "Assignment 8"
+---
+
+This is also the Final Project .Rmd dashboard
+
+[Link to RMD Dashboard](https://chantanmorinjr.shinyapps.io/FinalProjectDashboard/)
+
+<iframe width="800" height="600" src="https://chantanmorinjr.shinyapps.io/FinalProjectDashboard/">
+
+</iframe>
+
+## Code
+
+```{r, echo=TRUE, warning=FALSE, message=FALSE, results='hide', eval=FALSE}
+### Packages and Data Cleaning
+#install.packages("shiny")
+#install.packages("rmarkdown")
+library(plotly)
+library(shiny)
+library(ggplot2)
+library(rmarkdown)
+library(tidyverse)
+library(ggridges)
+library(GGally)
+library(RColorBrewer)
+library(viridis)
+library(extrafont)
+library(waffle)
+library(ggpubr)
+loadfonts(device = "win")
+
+dat <- read.csv("analytic_data2024.csv")
+
+# Download County Regions Key
+key <- read_excel("County Regions Key.xlsx")
+
+# Filtering Data to only variables and counties needed
+data_short <- dat[, c(3,4,5,681,536,210,200,205,39,44,49,86,91,437,442,96,711)]
+colnames(data_short) <- c("CountyFIPS", "State", "CountyName", "VoterTurnoutRate", "MedianHouseholdIncome", 
+                          "UnemploymentRate", "HSCompletion", "SomeCollegeEducation", "PoorOrFairHealth", 
+                          "AvgPoorPhysHealthDays", "AvgPoorMentalHealthDays", "ObesityRate", 
+                          "FoodEnviornmentIndex", "FoodInsecurity", "LimitedAccesstoHealthyFoods",
+                          "PhysInactivityRate", "Population")
+data.tx <- data_short %>%
+  filter(State == "TX" & CountyName != "Texas")
+
+# Making new variable to give every county a region using Key
+data.tx <- data.tx %>%
+  mutate(Region = with(key, region[match(CountyName, county)]))
+
+# Setting number columns to numeric (needed for GIS mapping)
+data.tx[4:17] <- lapply(data.tx[4:17], as.numeric)
+
+# Filtering Odd data
+data.tx.filter <- data.tx %>%
+  filter(complete.cases(.)) %>% 
+  filter(VoterTurnoutRate <= .90, SomeCollegeEducation <= 0.95, FoodEnviornmentIndex >= 0.5, 
+         LimitedAccesstoHealthyFoods >= 0.001)
+
+removed.data <- anti_join(data.tx, data.tx.filter, by = names(data.tx))
+removed.data[, -1] <- NA
+data.tx.filter <- bind_rows(data.tx.filter, removed.data)
+# Left with 246 Counties in Texas that have complete and reliable data
+
+# Writing new CSV for data analysis
+#write.csv(data.tx, "CleanProjectData.csv")
+
+data <- read.csv("CleanProjectData.csv")
+region_choices <- c("All", data$Region)
+region_colors <- c("The Panhandle" = "#a82eff", "West Texas" = "#02d914", 
+                   "Upper Gulf Coast" = "#00f7ff", "South Texas" = "#ff0400",
+                   "North Texas" = "#030ffc", "East Texas" = "#ff40df", 
+                   "Central Texas" = "#ff8f17")
+region_colors2 <- c("Panhandle" = "#a82eff", "West Texas" = "#02d914", 
+                   "U.Gulf Coast" = "#00c3c9", "South Texas" = "#ff0400",
+                   "North Texas" = "#030ffc", "East Texas" = "#ff40df", 
+                   "Central Texas" = "#ff8f17")
+
+### Ridges Plot
+data %>%
+  ggplot(aes(x=VoterTurnoutRate, y = Region, fill = Region))+
+  geom_density_ridges() +
+  theme_ridges() + 
+  scale_fill_brewer(viridis)+
+  theme(legend.position = "none")+
+  labs(x = "Voter Turnout Rate", y = "")+
+  theme(text = element_text(family = "Rockwell"))
+
+### Scatterplot Matrix
+
+panel.hist <- function(x, ...){
+  usr <- par("usr"); on.exit(par(usr))
+  par(usr = c(usr[1:2], 0, 1.5) )
+  h <- hist(x, plot = FALSE)
+  breaks <- h$breaks
+  len <- length(breaks)
+  y <- h$counts/max(h$counts)
+  rect(breaks[-len], 0, breaks[-1], y, col = "#17BEBB")
+}
+
+par(family = "Rockwell")
+data%>%
+  mutate(MedHouseIncome = log(MedianHouseholdIncome),
+         HealthyFood = LimitedAccesstoHealthyFoods,
+         Unemployment = UnemploymentRate)%>%
+  #MedHouseIncome, Unemployment, HSCompletion, 
+  select(PoorOrFairHealth, AvgPoorMentalHealthDays, AvgPoorMentalHealthDays, ObesityRate, HealthyFood, PhysInactivityRate, FoodInsecurity)%>%
+  plot(
+    family = "Rockwell",
+    pch=19,
+    cex=0.8,
+    lower.panel = panel.smooth,
+    diag.panel = panel.hist,
+    col="#0E7C7B",
+    #"Income", "Unemployment", "HS", 
+    labels = c("PoorHealth", "PoorMentalDays", "PoorPhysDays", "Obesity", "Unhealthy Food", "Inactivity", "Food Insecurity", "Region"),
+    gap = 0.3,
+    upper.panel = NULL,
+    main = "Scatterplot Matrix of Health Variables")
+dev.off()
+
+### Bar-Box Plot
+b <- data%>%
+  mutate(Region = ifelse(Region == "The Panhandle", "Panhandle",
+                         ifelse(Region == "Upper Gulf Coast", "U.Gulf Coast", Region))) %>%
+  ggbarplot(
+    x = "Region", y = "FoodEnviornmentIndex",
+    color = "Region",
+    add = c("median", "boxplot", "jitter"), 
+    add.params = list(width = 0.3),
+    position = position_dodge(0.8),
+    size = 1.2) +
+  labs(y = "Food Enviornment Index", x = "") +
+  scale_color_manual(values = region_colors2) +
+  theme_minimal() +
+  theme(legend.position = "none",
+        text = element_text(family = "Rockwell"),
+        panel.background = element_rect(fill = "gray90", color = NA))
+  
+
+ggplotly(b) %>% 
+  layout(legend = list(x = 0.75, y = 1))
+
+### Waffle Plot
+data%>%
+  mutate(nonbinaryindex = ifelse(FoodEnviornmentIndex >= 0.5, "High Food", "Low Food"),
+         rd = floor(FoodEnviornmentIndex),
+         ct = 1)%>%
+  group_by(rd,Region,nonbinaryindex)%>%
+  summarize(n=sum(ct))%>%
+  ggplot(aes(values = n, fill = Region))+
+  geom_waffle(
+    n_rows = 6,
+    color = "white",
+    na.rm =TRUE
+  )+
+  scale_fill_manual(values = region_colors)+
+  theme_minimal()+
+  ggtitle("Food Enviroment Index District Count")+
+  theme(legend.position = "bottom",
+        text = element_text(family = "Rockwell"))+
+  scale_x_discrete()+
+  scale_y_discrete()+
+  facet_wrap(~rd)+
+  coord_equal()
+
+### Scatterplots of Most Significant Findings
+ui <- fluidPage(
+  tags$style(HTML("
+    body {
+      background-color: #b3b3b3;
+      color: black;
+    }
+    
+    .shiny-input-container {
+      color: black;
+    }"
+  )),
+  
+  titlePanel("Scatterplots"), 
+  
+  sidebarLayout(
+    sidebarPanel(
+      selectInput("plotType", "Choose Variable:", 
+                  choices = c("Obesity Rate", "Food Insecurity", 
+                              "Average Poor Physical Health Days", 
+                              "Poor or Fair Health",
+                              "Physical Inactivity Rate",
+                              "Average Poor Mental Health Days (X)"), 
+                  selected = "Obesity Rate"),
+      uiOutput("variable_ui"),
+    ), 
+    
+    mainPanel(
+      plotOutput("distPlot")
+    )
+  )
+)
+
+
+server <- function(input, output) {
+  output$variable_ui <- renderUI({
+    switch(input$plotType,
+           "Obesity Rate" = selectInput("txregion", "Select Region:", 
+                                        choices = region_choices),
+           "Food Insecurity" = selectInput("txregion", "Select Region:", 
+                                           choices = region_choices),
+           "Average Poor Physical Health Days" = selectInput("txregion", 
+                                               "Select Region:", choices = region_choices),
+           "Poor or Fair Health" = selectInput("txregion", "Select Region:", 
+                                           choices = region_choices),
+           "Physical Inactivity Rate" = selectInput("txregion", "Select Region:", 
+                                           choices = region_choices),
+           "Average Poor Mental Health Days (X)" = selectInput("txregion", 
+                                               "Select Region:", choices = region_choices),
+           )
+    })
+  
+  output$distPlot <- renderPlot({
+    req(input$plotType)
+    
+  if (input$plotType == "Obesity Rate" && !is.null(input$txregion)) {
+      region <- input$txregion
+      data <- if (region == "All") {data
+        } else {data[data$Region == region, ]}
+      plot <- ggplot(data, aes_string(x = "ObesityRate", y = "VoterTurnoutRate", 
+                                     fill = "Region")) +
+               geom_point(shape = 23, size = 3) + 
+               scale_fill_manual(values = region_colors) + 
+               labs(x = "Obesity Rate", y = "Voter Turnout Rate") + 
+               theme_minimal() +
+               theme(text = element_text(family = "Rockwell"))
+             if (region == "All") {
+               plot <- plot + geom_smooth(aes_string(group = 1), method = "lm", 
+                                          col = "#00241B", alpha = 0.15)
+             } else {
+                 plot <- plot + geom_smooth(method = "lm", col = "#00241B", 
+                                            alpha = 0.15, 
+                                            aes_string(group = "Region"))
+             }
+      
+      return(plot)
+    }
+    
+  if (input$plotType == "Food Insecurity" && !is.null(input$txregion)) {
+      region <- input$txregion
+      data <- if (region == "All") {data
+        } else {data[data$Region == region, ]}
+      plot <- ggplot(data, aes_string(x = "FoodInsecurity", y = "VoterTurnoutRate", 
+                                     fill = "Region")) +
+               geom_point(shape = 23, size = 3) + 
+               scale_fill_manual(values = region_colors) + 
+               labs(x = "Food Insecurity", y = "Voter Turnout Rate") + 
+               theme_minimal() +
+               theme(text = element_text(family = "Rockwell"))
+             if (region == "All") {
+               plot <- plot + geom_smooth(aes_string(group = 1), method = "lm", 
+                                          col = "#00241B", alpha = 0.15)
+             } else {
+                 plot <- plot + geom_smooth(method = "lm", col = "#00241B", 
+                                            alpha = 0.15, 
+                                            aes_string(group = "Region"))
+             }
+      
+      return(plot)
+    }
+
+  if (input$plotType == "Average Poor Physical Health Days" && !is.null(input$txregion)) {
+      region <- input$txregion
+      data <- if (region == "All") {data
+        } else {data[data$Region == region, ]}
+      plot <- ggplot(data, aes_string(x = "AvgPoorPhysHealthDays", y = "VoterTurnoutRate", 
+                                     fill = "Region")) +
+               geom_point(shape = 23, size = 3) + 
+               scale_fill_manual(values = region_colors) + 
+               labs(x = "Average Poor Physical Health Days", y = "Voter Turnout Rate") + 
+               theme_minimal() +
+               theme(text = element_text(family = "Rockwell"))
+             if (region == "All") {
+               plot <- plot + geom_smooth(aes_string(group = 1), method = "lm", 
+                                          col = "#00241B", alpha = 0.15)
+             } else {
+                 plot <- plot + geom_smooth(method = "lm", col = "#00241B", 
+                                            alpha = 0.15, 
+                                            aes_string(group = "Region"))
+             }
+      
+      return(plot)
+    }
+    
+  if (input$plotType == "Poor or Fair Health" && !is.null(input$txregion)) {
+      region <- input$txregion
+      data <- if (region == "All") {data
+        } else {data[data$Region == region, ]}
+      plot <- ggplot(data, aes_string(x = "PoorOrFairHealth", y = "VoterTurnoutRate", 
+                                     fill = "Region")) +
+               geom_point(shape = 23, size = 3) + 
+               scale_fill_manual(values = region_colors) + 
+               labs(x = "Poor or Fair Health", y = "Voter Turnout Rate") + 
+               theme_minimal() +
+               theme(text = element_text(family = "Rockwell"))
+             if (region == "All") {
+               plot <- plot + geom_smooth(aes_string(group = 1), method = "lm", 
+                                          col = "#00241B", alpha = 0.15)
+             } else {
+                 plot <- plot + geom_smooth(method = "lm", col = "#00241B", 
+                                            alpha = 0.15, 
+                                            aes_string(group = "Region"))
+             }
+      
+      return(plot)
+    }
+    
+  if (input$plotType == "Physical Inactivity Rate" && !is.null(input$txregion)) {
+      region <- input$txregion
+      data <- if (region == "All") {data
+        } else {data[data$Region == region, ]}
+      plot <- ggplot(data, aes_string(x = "PhysInactivityRate", y = "VoterTurnoutRate", 
+                                     fill = "Region")) +
+               geom_point(shape = 23, size = 3) + 
+               scale_fill_manual(values = region_colors) + 
+               labs(x = "Physical Inactivity Rate", y = "Voter Turnout Rate") + 
+               theme_minimal() +
+               theme(text = element_text(family = "Rockwell"))
+             if (region == "All") {
+               plot <- plot + geom_smooth(aes_string(group = 1), method = "lm", 
+                                          col = "#00241B", alpha = 0.15)
+             } else {
+                 plot <- plot + geom_smooth(method = "lm", col = "#00241B", 
+                                            alpha = 0.15, 
+                                            aes_string(group = "Region"))
+             }
+      
+      return(plot)
+    }
+
+  if (input$plotType == "Average Poor Mental Health Days (X)" && !is.null(input$txregion)) {
+      region <- input$txregion
+      data <- if (region == "All") {data
+        } else {data[data$Region == region, ]}
+      plot <- ggplot(data, aes_string(x = "AvgPoorMentalHealthDays", y = "VoterTurnoutRate",
+                                     fill = "Region")) +
+               geom_point(shape = 23, size = 3) + 
+               scale_fill_manual(values = region_colors) + 
+               labs(x = "Average Poor Mental Health Days", y = "Voter Turnout Rate") + 
+               theme_minimal() +
+               theme(text = element_text(family = "Rockwell"))
+             if (region == "All") {
+               plot <- plot + geom_smooth(aes_string(group = 1), method = "lm", 
+                                          col = "#00241B", alpha = 0.15)
+             } else {
+                 plot <- plot + geom_smooth(method = "lm", col = "#00241B", 
+                                            alpha = 0.15, 
+                                            aes_string(group = "Region"))
+             }
+      
+      return(plot)
+    }
+  })
+}
+  
+shinyApp(ui = ui, server = server)
+
+### Bubble Chart 5
+p <- ggplot(data, aes(x= PoorOrFairHealth, y= VoterTurnoutRate, size =log(MedianHouseholdIncome), 
+                      color = Region, text = paste("MHI:", MedianHouseholdIncome))) +
+  geom_point(alpha=0.5, shape= 16) +
+  scale_color_manual(values = region_colors) +
+  scale_size(range = c(.1, 11), name="Voter Turnout", guide = "none") +
+  theme_minimal() +
+  labs(y = "Voter Turnout Rate", x = "Poor or Fair Health") +
+  theme(text = element_text(family = "Rockwell"))
+
+
+ggplotly(p, tooltip = "text") %>% 
+  layout(legend = list(x = 0.75, y = 1))
+
+### HTML with ArcGIS API 6
+
+[ArcGIS Voter Turnout Comparisons Maps](https://chantanmorinjr.github.io/GroupProjectDataVis.html)
+
+```

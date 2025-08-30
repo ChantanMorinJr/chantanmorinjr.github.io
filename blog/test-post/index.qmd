@@ -1,0 +1,13 @@
+---
+title: "test blog"
+description: "description"
+author:
+  - name: Chantan Morin Jr
+    url: https://chantanmorinjr.github.io/
+date: 10-09-2024
+categories: [EPPS 6356]
+image: utdcampus.png
+draft: FALSE
+---
+
+# THIS IS A TEST BLOG POST

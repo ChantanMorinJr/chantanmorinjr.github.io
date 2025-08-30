@@ -1,0 +1,31 @@
+---
+title: "Literate Programming and Reviewing Malinowski’s Music Visualization"
+description: "Notes on Bower's 'HOW TO IMPROVE YOUR RELATIONSHIP WITH YOUR FUTURE SELF' and reviewing Stephen Malinowski’s visualization of Chopin' Ballade no. 1 in G minor (opus 23)"
+author:
+  - name: Chantan Morin Jr
+    url: https://chantanmorinjr.github.io/
+date: 10-09-2024
+categories: [EPPS 6356]
+image: MalinowskiVis.png
+draft: FALSE
+---
+
+# Notes on Literate Programming
+
+People tend to forget things very quickly and easily. Because of this, one will forget why they made a certain decision when analyzing the data or when designing their research. The solution to this is to make data analysis quickly and easily reproduceable. When publishing, the research needs to be able to be replicated and reproduced if another wants to re-examine the conclusions made in the original publishing.
+
+Part of making data reproducible is making sure the reader of the research or code is able to know why some decision was made, communicating with the reader about why you decided to do something in the analysis rather than something else. This can be done by writing comments in the code. Comment liberally! Comments will be left alone when running code, so feel free to write as many you feel necessary. Another aspect of using comments is called **literate programming**. Literate programming is done by putting your code into the document paper along with the plot it creates. For instance, this can be done using R Markdown. This will better give better context to the code used than just comments alone, and thus makes the communication between analyst and reader clearer.
+
+A further note: DO NOT use setwd() for codes that are meant to be shared in the future or to others. This forces someone in the future using the data to edit the working directory to meet their needs. Using commands like load() or read.csv() instead, and have the source of the data easy to find. Further, how you clean data and the how you create the graphics with the cleaned data should be two separate .R documents. This is common practice.
+
+# Malinowski's Music Visualization Review
+
+Video: {{< video https://www.youtube.com/watch?v=2UhSjdPYpRU >}}
+
+The color used in this visualization are chosen by Malinowski’s “Harmonic Coloring” method. Blue signifies the tonic, or “home pitch”, basically the most important note within the music’s chosen key. The redder a note is, the more away it is from this tonic. This coloring stays consistent with the entire piece. When one looks at the colors as a whole, one will notice that some sections of the piece are “more blue” while other sections are “more red”. This is most evident at 4:42 and again at 5:50. This shows a key/tone change in the piece. In this piece, there is technically no key change, however, there are points in the piece where there are significantly more notes played outside the piece’s chose scale, or more away from the tonic. This blue-to-red shows this change in the piece.
+
+Another consistent part of this visualization is how the note’s length and volume are represented. The length of the note is generally represented by how long the symbol is. There are some symbols that do not really have a length, like the “dots” that appear in 2:37 and the “swipes” that appear in 3:16. The dots represent a quick succession of notes played in staccato (shortly and quickly), and thus by definition have a very short length which can be easily expressed and understood as a dot (even in music a staccato is symbolized by a dot on top of a note). The swipes note length is symbolized by the “crescent” that comes out in the direction of the swipe towards the next note in the phrase. The volume of a note is represented by the width of the symbol. If the symbol is directly connected to another symbol, this means that the second note is played immediately after the note connected to it, without any “rest”.
+
+Finally, there are different symbols used throughout the piece. Generally, if there is a dramatic symbol change, it means that the piece is using a new melody. For instance, the beginning of the first melody is technically at 0:44, represented by the notes symbolized by the “lens” (the round shape at is thinner at the ends). This melody appears again at 4:45 in a different key and 7:22 in a faster tempo, symbolized the same way. The second main melody appears at 3:29 with a new symbol, the aforementioned “swipes”. These appear again at 5:14 in a different key and 6:52, symbolized the same way. Both these melodies are usually accompanied by their own harmony, an oval with a white line for the lens melody and a solid color oval for the swipes melody. This is not always the case, though, like in 7:22, the lens melody plays with the swipe’s harmony, until around 8:00 where the lens melody plays with its respective harmony. There is a brief unique melody played at 2:14, symbolized by “pins”, which only appears once. The aforementioned “dots” appear at 2:37, 5:53, 8:34, again representing a rapid succession of staccato notes. They appear out of nowhere and disappear quicker than the rest of the notes in the visualization, possibly mimicking the erratic and quick nature of the phrase. Finally, at 9:56, there are square symbols that only appear here to conclude the piece. These squares were likely uniquely used here to represent both hands of the pianist playing the exact same chromatic scale at the exact same time, which happens no where else in the piece. The rolling square animation to symbolize the “fall” to the next note also brings to mind the “steps” of a chromatic scale, making the visualization represent the feeling of the music like the “dots” did.
+
+In all, this visualization is able to capture the feeling of the piece and call backs to certain melodies with its great use of symbol shapes, and the reader can easily follow along which notes are played and when the key changes depending on the color.
