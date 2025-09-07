@@ -1,5 +1,6 @@
 project:
   type: website
+  output-dir: docs
 
 website:
   title: "Chantan NEW Quarto Website"
@@ -8,6 +9,8 @@ website:
     left:
       - href: index.qmd
         text: Home
+      - href: Resume.qmd
+        text: Resume
       - href: blog.qmd
         text: Blog
       - text: EPPS 6356

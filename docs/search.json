@@ -208,5 +208,12 @@
     "title": "test blog",
     "section": "",
     "text": "THIS IS A TEST BLOG POST"
+  },
+  {
+    "objectID": "Resume.html",
+    "href": "Resume.html",
+    "title": "Resume",
+    "section": "",
+    "text": "Resume"
   }
 ]
