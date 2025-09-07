@@ -215,5 +215,12 @@
     "title": "Resume",
     "section": "",
     "text": "Resume"
+  },
+  {
+    "objectID": "2Assignment1.html",
+    "href": "2Assignment1.html",
+    "title": "Assignment 1",
+    "section": "",
+    "text": "One-Page Description of Website\nThis website was made using RStudio’s Quarto project. I first made it about a year ago, Fall 2024, in order to submit assignments for Dr. Ho’s Data Visualization class, and is currently being used for personal and educational purposes. The website uses the “darkly” theme and “success” background, which makes the navigation bar a bright, neon green and the main window black. I feel this is easier on the eyes.\nNext to the Home tab is the Resume tab, which holds an updated version of my resume as of Fall 2025. I used that version of the resume to apply for a job as a GIS Technician for Dallas Police Department (still waiting to hear back).\nNext to that tab is the Blog, where I posted a couple blogs needed for class. Making a Blog on Quarto as part of the website was not as easy as creating a new .qmd document and updating the .yml, but it required its own .yml and folder in order to function.\nNext to that are my dropdown boxes that lead to assignments for each of Dr. Ho’s classes I have taken so far. The first is EPPS 6356: Data Visualization. There, you will find the 8 Assignments that I posted for the class, including some for the group project I was in. Most of these assignments are about making and designing graphs in R and making ShinyApps to make dynamic and interactable graphs. I also used ArcGIS to make maps showing the results of our group project. The second is EPPS 6302: Data Collection and Production. This has yet to be filled out all the way."
   }
 ]

@@ -31,6 +31,10 @@ website:
             text: Assignment 7
           - href: assignment8.qmd
             text: Assignment 8
+      - text: EPPS 6302
+        menu:
+          - href: 2Assignment1.qmd
+            text: Assignment 1
 
 format:
   html:
