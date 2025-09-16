@@ -35,6 +35,8 @@ website:
         menu:
           - href: 2Assignment1.qmd
             text: Assignment 1
+          - href: 2Assignment2.qmd
+            text: Assignment 2
 
 format:
   html:

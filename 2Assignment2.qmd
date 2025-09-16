@@ -1,0 +1,5 @@
+---
+title: "2Assignment2"
+---
+
+![Trump-Harris Election Hits Google Trends](\images\TrumpHarrisElectionR.png)
