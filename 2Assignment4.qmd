@@ -1,0 +1,33 @@
+---
+title: "2Assignment4"
+---
+
+# Code and Scrapped Table
+```{r, warning=FALSE, message=FALSE}
+# install.packages("tidyverse")
+library(tidyverse)
+# install.packages("rvest")
+library(rvest)
+
+
+### Assignment 4
+url2 <- 'https://en.wikipedia.org/wiki/List_of_dates_predicted_for_apocalyptic_events'
+#Reading the HTML code from the Wiki website
+wikifaiapo <- read_html(url2)
+class(wikifaiapo)
+
+failedapopred <- wikifaiapo %>%
+  html_nodes(xpath='//*[@id="mw-content-text"]/div[1]/table[1]') %>%
+  html_table()
+class(failedapopred)
+failedapopred_tab = failedapopred[[1]]
+failedapopred_tab = failedapopred_tab[, c(1:3)]
+
+write.csv(failedapopred_tab, "assets/scrapped Assignment 4 Table.csv", row.names = FALSE)
+
+print(failedapopred_tab, width = Inf)
+
+```
+
+
+
