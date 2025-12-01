@@ -378,6 +378,6 @@ ggplotly(p, tooltip = "text") %>%
 
 ### HTML with ArcGIS API 6
 
-[ArcGIS Voter Turnout Comparisons Maps](https://chantanmorinjr.github.io/GroupProjectDataVis.html)
+[ArcGIS Voter Turnout Comparisons Maps](https://chantanmorinjr.github.io/assets/GroupProjectDataVis.html)
 
 ```

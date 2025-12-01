@@ -1,0 +1,131 @@
+<html>
+<head>
+	<meta name="keywords" content="Internet Mapping, Web GIS, Final Project EPPS 6356">
+	<meta name="description" content="Texas Regions vs Voter Turnout using Maps">
+	<meta charset="utf-8">
+    <meta name="viewport" content="initial-scale=1,maximum-scale=1,user-scalable=no">
+	
+	<title>Group Project - EPPS 6356</title>
+	<h1>Voter Turnout Comparisons (by Texas County)</h1>
+    <style>
+		html, body, {
+			padding: 0;
+			margin: 0.5%;
+			height: 99%;
+			width: 99%;
+			overflow: hidden;}
+		#viewSwipe {
+			position: absolute;
+				left: 1%;
+				right: 1%;
+				top: 10%;
+				bottom: 0;
+				height: 89%;}
+	</style>
+	
+	<link rel="stylesheet" href="https://js.arcgis.com/4.28/esri/themes/light/main.css"/>
+<script src="https://js.arcgis.com/4.28/"></script>
+
+<script>
+	require(["esri/Map",
+			 "esri/views/MapView", 
+			 "esri/layers/FeatureLayer", 
+			 "esri/widgets/Swipe",
+			 "esri/widgets/LayerList",
+			 "esri/widgets/Search",
+			 "esri/widgets/Legend",
+			 "esri/widgets/Home"], 
+	(Map, MapView, FeatureLayer, Swipe, LayerList, Search, Legend, Home) => {
+		const map = new Map({
+			basemap: "terrain"
+		});
+		
+		const RegionsLayer = new FeatureLayer({
+			url: "https://services2.arcgis.com/VNo0ht0YPXJoI4oE/arcgis/rest/services/Texas_Regions_Feature_Layer/FeatureServer",
+			title: "Texas Regions",
+			listMode: "hide"
+		});
+		map.add(RegionsLayer);
+	
+		const VTLayer = new FeatureLayer({
+			url: "https://services2.arcgis.com/VNo0ht0YPXJoI4oE/arcgis/rest/services/Voter_Turnout_Rate_Texas_Counties/FeatureServer",
+			title: "Voter Turnout Percentage"
+		});
+		map.add(VTLayer);
+		
+		const ORLayer = new FeatureLayer({
+			url: "https://services2.arcgis.com/VNo0ht0YPXJoI4oE/arcgis/rest/services/Obesity_Rate_Texas_Counties/FeatureServer",
+			title: "Obesity Rate"
+		});
+		map.add(ORLayer);
+		
+		const FILayer = new FeatureLayer({
+			url: "https://services2.arcgis.com/VNo0ht0YPXJoI4oE/arcgis/rest/services/Food_Insecurity_Texas_Counties/FeatureServer",
+			title: "Food Insecurity"
+		});
+		map.add(FILayer);
+		
+		const PHYLayer = new FeatureLayer({
+			url: "https://services2.arcgis.com/VNo0ht0YPXJoI4oE/arcgis/rest/services/Average_Poor_Physical_Health_Days_Texas_Counties/FeatureServer",
+			title: "Avg. Poor Physical Health Days"
+		});
+		map.add(PHYLayer);
+		
+		const PFHLayer = new FeatureLayer({
+			url: "https://services2.arcgis.com/VNo0ht0YPXJoI4oE/arcgis/rest/services/Avg_Reported_Poor_or_Fair_Health_Texas_Counties/FeatureServer",
+			title: "Avg. Reported Poor/Fair Health"
+		});
+		map.add(PFHLayer);
+		
+		const IRLayer = new FeatureLayer({
+			url: "https://services2.arcgis.com/VNo0ht0YPXJoI4oE/arcgis/rest/services/Physical_Inactivity_Rate_Texas_Counties/FeatureServer",
+			title: "Physical Inactivity Rate"
+		});
+		map.add(IRLayer);
+		
+		const view = new MapView({
+			container: "viewSwipe",
+			map: map,
+			zoom: 6,
+			center: [-98, 31]
+		});
+		
+		const swipe = new Swipe({
+			leadingLayers: [VTLayer],
+			trailingLayers: [RegionsLayer, ORLayer, FILayer, PHYLayer, PFHLayer, IRLayer],
+			direction: "horizontal",
+			position: 50,
+			view: view
+		});
+		view.ui.add(swipe)
+		
+		const layerList = new LayerList({
+			view: view
+		});
+		view.ui.add(layerList, {position: "bottom-left"});
+		
+		const search = new Search({
+			view: view,
+			maxSuggestions: 4
+		});
+		view.ui.add(search, {position: "bottom-left"});
+		
+		const legend = new Legend({
+			view: view,
+			style: "classic",
+			hideLayersNotInCurrentView: true
+		});
+		view.ui.add(legend, "bottom-right");
+		
+		const homeWidget = new Home({
+			view: view
+		});
+		view.ui.add(homeWidget, "top-left");
+	});
+</script>
+</head>
+<body>
+	<body style="background-color:white;">
+	<div id="viewSwipe"></div>
+</body>
+</html>

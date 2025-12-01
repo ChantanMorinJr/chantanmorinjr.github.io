@@ -1,0 +1,202 @@
+<html>
+<head>
+	<meta name="keywords" content="Internet Mapping, Web GIS, Final Project GISC 6302">
+	<meta name="description" content="Crime Rates comparison to CCMR Criteria by School District">
+	<meta charset="utf-8">
+    <meta name="viewport" content="initial-scale=1,maximum-scale=1,user-scalable=no">
+	
+	<title>Final Project - EPPS 6302</title>
+	<h1>Crime Rates to CCMR Criteria (by School District area)</h1>
+    <style>
+		html, body, {
+			padding: 0;
+			margin: 0.5%;
+			height: 99%;
+			width: 99%;
+			overflow: hidden;}
+		#viewSwipe {
+			position: absolute;
+				left: 1%;
+				right: 1%;
+				top: 10%;
+				bottom: 0;
+				height: 89%;}
+	</style>
+	
+	<link rel="stylesheet" href="https://js.arcgis.com/4.28/esri/themes/light/main.css"/>
+<script src="https://js.arcgis.com/4.28/"></script>
+
+<script>
+	require(["esri/Map",
+			 "esri/views/MapView", 
+			 "esri/layers/FeatureLayer",
+			 "esri/layers/GroupLayer", 
+			 "esri/widgets/Swipe",
+			 "esri/widgets/LayerList",
+			 "esri/widgets/Search",
+			 "esri/widgets/Legend",
+			 "esri/widgets/Home"], 
+	(Map, MapView, FeatureLayer, GroupLayer, Swipe, LayerList, Search, Legend, Home) => {
+		const map = new Map({
+			basemap: "dark-gray"
+		});
+		
+		const VCrimeLayer = new FeatureLayer({
+			url: "https://services2.arcgis.com/VNo0ht0YPXJoI4oE/arcgis/rest/services/Project_Layers/FeatureServer/9",
+			title: "Violent Crime Rates",
+		});
+	
+		const PCrimeLayer = new FeatureLayer({
+			url: "https://services2.arcgis.com/VNo0ht0YPXJoI4oE/arcgis/rest/services/Project_Layers/FeatureServer/8",
+			title: "Property Crime Rates"
+		});
+
+		const CCMRGradLayer = new FeatureLayer({
+			url: "https://services2.arcgis.com/VNo0ht0YPXJoI4oE/arcgis/rest/services/Project_Layers/FeatureServer/7",
+			title: "CCMR Graduate Rates (All Criteria)"
+		});
+		
+		const ColRedLayer = new FeatureLayer({
+			url: "https://services2.arcgis.com/VNo0ht0YPXJoI4oE/arcgis/rest/services/Project_Layers/FeatureServer/6",
+			title: "College-Ready Graduates (Criteria 1-5)"
+		});
+		
+		const TSILayer = new FeatureLayer({
+			url: "https://services2.arcgis.com/VNo0ht0YPXJoI4oE/arcgis/rest/services/Project_Layers/FeatureServer/5",
+			title: "Criteria 1 - TSI"
+		});
+
+		const DCLayer = new FeatureLayer({
+			url: "https://services2.arcgis.com/VNo0ht0YPXJoI4oE/arcgis/rest/services/Project_Layers/FeatureServer/4",
+			title: "Criteria 2 - Dual-Credit"
+		});
+
+		const APLayer = new FeatureLayer({
+			url: "https://services2.arcgis.com/VNo0ht0YPXJoI4oE/arcgis/rest/services/Project_Layers/FeatureServer/3",
+			title: "Criteria 3 - AP/IB"
+		});
+
+		const AssLayer = new FeatureLayer({
+			url: "https://services2.arcgis.com/VNo0ht0YPXJoI4oE/arcgis/rest/services/Project_Layers/FeatureServer/2",
+			title: "Criteria 4 - Associate's Degree"
+		});
+
+		const RampLayer = new FeatureLayer({
+			url: "https://services2.arcgis.com/VNo0ht0YPXJoI4oE/arcgis/rest/services/Project_Layers/FeatureServer/1",
+			title: "Criteria 5 - OnRamps Completion"
+		});
+
+		VCrimeLayer.visible = true;
+		PCrimeLayer.visible = false;
+		CCMRGradLayer.visible = true;
+		ColRedLayer.visible = false;
+		TSILayer.visible = false;
+		DCLayer.visible = false;
+		APLayer.visible = false;
+		AssLayer.visible = false;
+		RampLayer.visible = false;
+
+		const leadingGroup = new GroupLayer({
+  			title: "Crime Variables",
+  			layers: [VCrimeLayer, PCrimeLayer]
+		});
+		const trailingGroup = new GroupLayer({
+ 			title: "CCMR Variables",
+  			layers: [CCMRGradLayer, ColRedLayer, TSILayer, DCLayer, APLayer, AssLayer, RampLayer]
+		});
+		map.addMany([leadingGroup, trailingGroup]);
+
+		const view = new MapView({
+			container: "viewSwipe",
+			map: map,
+			zoom: 6,
+			center: [-96, 31]
+		});
+		view.ui.move("zoom", "top-right");
+
+		const leadingList = new LayerList({
+  			view: view,
+  			listItemCreatedFunction: (event) => {
+    			const item = event.item;
+				if (item.layer !== leadingGroup && item.layer.parent !== leadingGroup) {
+      				item.hidden = true;
+   				 }
+				if (item.children && item.children.length > 0) {
+      				item.open = true;
+  				  }
+		  }
+		});
+		const trailingList = new LayerList({
+  			view: view,
+  			listItemCreatedFunction: (event) => {
+    			const item = event.item;
+				if (item.layer !== trailingGroup && item.layer.parent !== trailingGroup) {
+      				item.hidden = true;
+   				 }
+				if (item.children && item.children.length > 0) {
+      				item.open = true;
+  				  }
+		  }
+		});
+		view.ui.add(leadingList, { position: "bottom-left" });
+		view.ui.add(trailingList, { position: "bottom-right" });
+
+		const swipe = new Swipe({
+			leadingLayers: [leadingGroup],
+ 			trailingLayers: [trailingGroup],
+			direction: "horizontal",
+			position: 30,
+			view: view
+		});
+		view.ui.add(swipe)
+
+
+// Animation done with ChatGPT 5.0
+function animateSwipe(swipe, start, end, duration, callback) {
+  const startTime = performance.now();
+  function step(currentTime) {
+    const elapsed = currentTime - startTime;
+    let t = elapsed / duration;
+    t = t > 1 ? 1 : t;
+    const ease = 1 - Math.pow(1 - t, 3);
+    swipe.position = start + (end - start) * ease;
+    if (t < 1) {
+      requestAnimationFrame(step);
+    } else if (callback) {
+      callback();
+    }
+  }
+  requestAnimationFrame(step);
+}
+setTimeout(() => {
+  animateSwipe(swipe, 30, 70, 2200, () => {   
+    animateSwipe(swipe, 70, 50, 1000);          
+  });
+}, 1000);
+// End of AI Generated section
+
+		const search = new Search({
+			view: view,
+			maxSuggestions: 4
+		});
+		view.ui.add(search, {position: "bottom-left"});
+		
+		const legend = new Legend({
+			view: view,
+			style: "classic",
+			hideLayersNotInCurrentView: true
+		});
+		view.ui.add(legend, "top-left");
+		
+		const homeWidget = new Home({
+			view: view
+		});
+		view.ui.add(homeWidget, "top-right");
+	});
+</script>
+</head>
+<body>
+	<body style="background-color:whitesmoke;">
+	<div id="viewSwipe"></div>
+</body>
+</html>
