@@ -27,6 +27,8 @@ library(RColorBrewer)
 library(viridis)
 library(extrafont)
 library(ggpubr)
+library(readr)
+library(sjPlot)
 
 # Use standard font to avoid "invalid font type" errors
 font_family <- "sans"
@@ -76,9 +78,52 @@ data <- raw_data %>%
         PovertyRate, # (was MedianHouseholdIncome)
         ViolentRate, # (was ObesityRate)
         PropertyRate, # (was FoodInsecurity)
-        MobilityRate # (was LimitedAccesstoHealthyFoods)
+        MobilityRate, # (was LimitedAccesstoHealthyFoods)
+        heterogeneity6
     ) %>%
     filter(complete.cases(.)) # Filter missing data
+
+data <- data %>%
+  mutate(
+    hover_txt = paste0(
+      "District: ", Name,
+      "<br>County: ", Region,
+      "<br>Grad Rate: ", round(GraduationRates, 1), "%",
+      "<br>CCMR Grads: ", round(CCMR.Grads, 1), "%",
+      "<br>College-Ready Grads: ", round(CCMR.College, 1), "%",
+      "<br>TSI Criteria Completion: ", round(TSI.Both, 1), "%",
+      "<br>Dual-Credit Criteria Completion: ", round(DualCredit, 1), "%",
+      "<br>AP/IB Criteria Completion: ", round(APBI, 1), "%",
+      "<br>Associate's Criteria Completion: ", round(Associates, 1), "%",
+      "<br>OnRamps Criteria Completion: ", round(OnRamps, 1), "%",
+      "<br>Violent Rate: ", round(ViolentRate, 2), " per 1,000",
+      "<br>Property Rate: ", round(PropertyRate, 2), " per 1,000",
+      "<br>Poverty: ", round(PovertyRate, 1), "%",
+      "<br>Residential Mobility: ", round(MobilityRate, 1), "%",
+      "<br>Heterogeneity Index: ", round(heterogeneity6, 1)
+    ),
+    hover_txt1 = paste0(
+      "District: ", Name,
+      "<br>County: ", Region,
+      "<br>Grad Rate: ", round(GraduationRates, 1), "%",
+      "<br>Violent Rate: ", round(ViolentRate, 2), " per 1,000",
+      "<br>Poverty: ", round(PovertyRate, 1), "%"
+    ),
+      hover_txt2 = paste0(
+      "District: ", Name,
+      "<br>County: ", Region,
+      "<br>CCMR Grads: ", round(CCMR.Grads, 1), "%",
+      "<br>Property Rate: ", round(PropertyRate, 2), " per 1,000",
+      "<br>Residential Mobility: ", round(MobilityRate, 1), "%"
+      ),
+    hover_txt3 = paste0(
+      "District: ", Name,
+      "<br>County: ", Region,
+      "<br>College-Ready Grads: ", round(CCMR.College, 1), "%",
+      "<br>Property Rate: ", round(PropertyRate, 2), " per 1,000",
+      "<br>Heterogeneity Index: ", round(heterogeneity6, 1)
+    )
+  )
 
 # Define colors for the new "Regions" (Counties)
 region_choices <- c("All", unique(data$Region))
@@ -104,9 +149,7 @@ p_ridge <- data %>%
 print(p_ridge)
 
 ### Correlation Matrix
-
 # Relationships between CCMR and Crime variables (Removed Poverty/Mobility)
-
 panel.hist <- function(x, ...) {
     usr <- par("usr")
     on.exit(par(usr))
@@ -136,44 +179,50 @@ data %>%
         main = "Scatterplot Matrix: CCMR vs Crime"
     )
 
-# Restore settings
-par(old_par)
-
 ### Bubble Chart 1
-
 # --- Bubble Chart 1: Violent Crime vs CCMR Grads (Size = Poverty) ---
 p_bubble1 <- ggplot(data, aes(
-    x = ViolentRate, y = CCMR.Grads, size = PovertyRate,
-    color = Region, text = paste("Name:", Name)
+    x = ViolentRate, y = GraduationRates, size = PovertyRate,
+    color = Region, text = hover_txt1
 )) +
-    geom_point(alpha = 0.5, shape = 16) +
+    geom_point(alpha = 0.7, shape = 16) +
     scale_size(range = c(1, 10), name = "Poverty Rate", guide = "none") +
     theme_minimal() +
-    labs(y = "CCMR Graduates", x = "Violent Crime Rate", title = "Violent Crime vs CCMR Grads (Size = Poverty)") +
+    labs(y = "CCMR Graduates", x = "Violent Crime Rate", title = "Violent Crime vs Graduation Rates (Size = Poverty)") +
     theme(text = element_text(family = font_family), legend.position = "none")
 
 ggplotly(p_bubble1, tooltip = "text") %>% 
   layout(legend = list(x = 0.75, y = 1))
 
-
-
 ### Bubble Chart 2
-
 p_bubble2 <- ggplot(data, aes(
-    x = PropertyRate, y = CCMR.College, size = MobilityRate,
-    color = Region, text = paste("Name:", Name)
+    x = PropertyRate, y = CCMR.Grads, size = MobilityRate,
+    color = Region, text = hover_txt2
 )) +
-    geom_point(alpha = 0.5, shape = 16) +
+    geom_point(alpha = 0.7, shape = 16) +
     scale_size(range = c(1, 10), name = "Mobility Rate", guide = "none") +
     theme_minimal() +
-    labs(y = "CCMR College Ready", x = "Property Crime Rate", title = "Property Crime vs CCMR College (Size = Mobility)") +
+    labs(y = "CCMR Graduates Rate", x = "Property Crime Rate", title = "Property Crime vs CCMR Grads (Size = Mobility)") +
+    theme(text = element_text(family = font_family), legend.position = "none")
+
+ggplotly(p_bubble2, tooltip = "text") %>% 
+  layout(legend = list(x = 0.75, y = 1))
+
+### Bubble Chart 3
+p_bubble2 <- ggplot(data, aes(
+    x = PropertyRate, y = CCMR.College, size = heterogeneity6,
+    color = Region, text = hover_txt3
+)) +
+    geom_point(alpha = 0.7, shape = 16) +
+    scale_size(range = c(1, 10), name = "Heterogeneity Index", guide = "none") +
+    theme_minimal() +
+    labs(y = "CCMR Graduates Rate", x = "Property Crime Rate", title = "Property Crime vs CCMR College-Ready Grads (Size = Heterogeneity Index)") +
     theme(text = element_text(family = font_family), legend.position = "none")
 
 ggplotly(p_bubble2, tooltip = "text") %>% 
   layout(legend = list(x = 0.75, y = 1))
 
 ### ShinyApp
-
 # Full implementation of the interactive scatterplot explorer with Modern UI
 
 ui <- fluidPage(
@@ -264,7 +313,7 @@ ui <- fluidPage(
             # Control Panel
             div(
                 class = "card",
-                h4("Controls", style = "margin-top: 0; margin-bottom: 20px; font-size: 18px; font-weight: 600;"),
+                h4("Controls (Hue = Poverty)", style = "margin-top: 0; margin-bottom: 20px; font-size: 18px; font-weight: 600;"),
                 selectInput("x_var", "Predictor (X-Axis)",
                     choices = c(
                         "Violent Crime Rate" = "ViolentRate",
@@ -316,7 +365,7 @@ server <- function(input, output) {
         y_var <- input$y_var
 
         # Create base ggplot
-        p <- ggplot(plot_data, aes_string(x = x_var, y = y_var, fill = "Region", text = "Name")) +
+        p <- ggplot(plot_data, aes_string(x = x_var, y = y_var, fill = "PovertyRate", text = "hover_txt")) +
             geom_point(shape = 21, size = 3, color = "white", stroke = 0.5) +
             labs(
                 x = names(which(c(
@@ -334,7 +383,7 @@ server <- function(input, output) {
                     "OnRamps" = "OnRamps"
                 ) == y_var))
             ) +
-            theme_minimal() +
+            theme_gray() +
             theme(
                 text = element_text(family = font_family),
                 axis.title = element_text(size = 12, face = "bold", color = "#374151"),
@@ -346,13 +395,13 @@ server <- function(input, output) {
 
         # Add regression line
         if (!is.null(input$region) && input$region == "All") {
-            p <- p + geom_smooth(aes(group = 1), method = "lm", color = "#111827", alpha = 0.2, size = 0.8)
+            p <- p + geom_smooth(aes(group = 1), method = "lm", color = "red", alpha = 0.2, size = 0.8)
         } else {
-            p <- p + geom_smooth(method = "lm", color = "#111827", alpha = 0.2, size = 0.8)
+            p <- p + geom_smooth(method = "lm", color = "red", alpha = 0.2, size = 0.8)
         }
 
         # Convert to Plotly with enhanced config
-        ggplotly(p, tooltip = c("text", "x", "y")) %>%
+        ggplotly(p, tooltip = c("text")) %>%
             config(
                 displayModeBar = TRUE,
                 displaylogo = FALSE,
@@ -362,7 +411,7 @@ server <- function(input, output) {
                 )
             ) %>%
             layout(
-                hoverlabel = list(bgcolor = "white", font = list(family = "Inter")),
+                hoverlabel = list(bgcolor = "azure2", font = list(family = "Inter")),
                 margin = list(t = 20, r = 20, b = 20, l = 20)
             )
     })
@@ -370,7 +419,6 @@ server <- function(input, output) {
 
 # Run the application only in interactive mode
 shinyApp(ui = ui, server = server)
-
 
 ### Map
 
