@@ -2,6 +2,8 @@
 title: "Final Presentation"
 ---
 
+[Link to Google Slides Portion of Presentation](https://docs.google.com/presentation/d/1enng_qr95KrJKR760wzB6u-KmlCtViqBboM_zHF_BBg/edit?slide=id.g4dfce81f19_0_45#slide=id.g4dfce81f19_0_45)
+
 [Link to RMD Dashboard](https://chantanmorinjr.shinyapps.io/FinalProjectDashboard2/)
 
 <iframe width="800" height="600" src="https://chantanmorinjr.shinyapps.io/FinalProjectDashboard2/">
