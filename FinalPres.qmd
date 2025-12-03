@@ -184,13 +184,13 @@ data %>%
 ### Bubble Chart 1
 # --- Bubble Chart 1: Violent Crime vs CCMR Grads (Size = Poverty) ---
 p_bubble1 <- ggplot(data, aes(
-    x = ViolentRate, y = GraduationRates, size = PovertyRate,
+    x = GraduationRates, y = ViolentRate, size = PovertyRate,
     color = Region, text = hover_txt1
 )) +
     geom_point(alpha = 0.7, shape = 16) +
     scale_size(range = c(1, 10), name = "Poverty Rate", guide = "none") +
     theme_minimal() +
-    labs(y = "CCMR Graduates", x = "Violent Crime Rate", title = "Violent Crime vs Graduation Rates (Size = Poverty)") +
+    labs(y = "Violent Crime Rates", x = "CCMR Graduates", title = "Violent Crime vs Graduation Rates (Size = Poverty)") +
     theme(text = element_text(family = font_family), legend.position = "none")
 
 ggplotly(p_bubble1, tooltip = "text") %>% 
@@ -198,30 +198,30 @@ ggplotly(p_bubble1, tooltip = "text") %>%
 
 ### Bubble Chart 2
 p_bubble2 <- ggplot(data, aes(
-    x = PropertyRate, y = CCMR.Grads, size = MobilityRate,
+    x = CCMR.Grads, y = PropertyRate, size = MobilityRate,
     color = Region, text = hover_txt2
 )) +
     geom_point(alpha = 0.7, shape = 16) +
     scale_size(range = c(1, 10), name = "Mobility Rate", guide = "none") +
     theme_minimal() +
-    labs(y = "CCMR Graduates Rate", x = "Property Crime Rate", title = "Property Crime vs CCMR Grads (Size = Mobility)") +
+    labs(y = "Property Crime Rate", x = "CCMR Graduates Rate", title = "Property Crime vs CCMR Grads (Size = Mobility)") +
     theme(text = element_text(family = font_family), legend.position = "none")
 
 ggplotly(p_bubble2, tooltip = "text") %>% 
   layout(legend = list(x = 0.75, y = 1))
 
 ### Bubble Chart 3
-p_bubble2 <- ggplot(data, aes(
-    x = PropertyRate, y = CCMR.College, size = heterogeneity6,
+p_bubble3 <- ggplot(data, aes(
+    x = CCMR.College, y = PropertyRate, size = heterogeneity6,
     color = Region, text = hover_txt3
 )) +
     geom_point(alpha = 0.7, shape = 16) +
     scale_size(range = c(1, 10), name = "Heterogeneity Index", guide = "none") +
     theme_minimal() +
-    labs(y = "CCMR Graduates Rate", x = "Property Crime Rate", title = "Property Crime vs CCMR College-Ready Grads (Size = Heterogeneity Index)") +
+    labs(y = "Property Crime Rate", x = "CCMR College-Ready Rate", title = "Property Crime vs CCMR College-Ready Grads (Size = Heterogeneity Index)") +
     theme(text = element_text(family = font_family), legend.position = "none")
 
-ggplotly(p_bubble2, tooltip = "text") %>% 
+ggplotly(p_bubble3, tooltip = "text") %>% 
   layout(legend = list(x = 0.75, y = 1))
 
 ### ShinyApp
@@ -318,13 +318,6 @@ ui <- fluidPage(
                 h4("Controls (Hue = Poverty)", style = "margin-top: 0; margin-bottom: 20px; font-size: 18px; font-weight: 600;"),
                 selectInput("x_var", "Predictor (X-Axis)",
                     choices = c(
-                        "Violent Crime Rate" = "ViolentRate",
-                        "Property Crime Rate" = "PropertyRate"
-                    ),
-                    selected = "ViolentRate"
-                ),
-                selectInput("y_var", "Outcome (Y-Axis)",
-                    choices = c(
                         "CCMR Grads" = "CCMR.Grads",
                         "CCMR College Ready" = "CCMR.College",
                         "Graduation Rates" = "GraduationRates",
@@ -335,6 +328,13 @@ ui <- fluidPage(
                         "OnRamps" = "OnRamps"
                     ),
                     selected = "CCMR.Grads"
+                ),
+                selectInput("y_var", "Outcome (Y-Axis)",
+                    choices = c(
+                         "Violent Crime Rate" = "ViolentRate",
+                        "Property Crime Rate" = "PropertyRate"
+                    ),
+                    selected = "ViolentRate"
                 ),
                 uiOutput("region_selector")
             ),
@@ -371,10 +371,6 @@ server <- function(input, output) {
             geom_point(shape = 21, size = 3, color = "white", stroke = 0.5) +
             labs(
                 x = names(which(c(
-                    "Violent Crime Rate" = "ViolentRate",
-                    "Property Crime Rate" = "PropertyRate"
-                ) == x_var)),
-                y = names(which(c(
                     "Graduation Rates" = "GraduationRates",
                     "CCMR Grads" = "CCMR.Grads",
                     "CCMR College Ready" = "CCMR.College",
@@ -383,6 +379,10 @@ server <- function(input, output) {
                     "AP/IB" = "APBI",
                     "Associates Degree" = "Associates",
                     "OnRamps" = "OnRamps"
+                ) == x_var)),
+                y = names(which(c(
+                    "Violent Crime Rate" = "ViolentRate",
+                    "Property Crime Rate" = "PropertyRate"
                 ) == y_var))
             ) +
             theme_gray() +
